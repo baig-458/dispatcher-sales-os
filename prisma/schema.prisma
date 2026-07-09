@@ -6,3 +6,66 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+enum Role {
+  ADMIN
+  SALES
+  DISPATCHER
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  password  String
+
+  role      Role @default(SALES)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum CarrierStatus {
+  LEAD
+  ACTIVE
+  INACTIVE
+  BLACKLISTED
+}
+
+enum EquipmentType {
+  DRY_VAN
+  REEFER
+  FLATBED
+  STEP_DECK
+  POWER_ONLY
+  HOTSHOT
+  BOX_TRUCK
+}
+
+model Carrier {
+  id              String          @id @default(cuid())
+
+  companyName     String
+  ownerName       String?
+
+  mcNumber        String          @unique
+  dotNumber       String?
+
+  phone           String
+  email           String?
+
+  equipment       EquipmentType
+
+  preferredLanes  String?
+
+  status          CarrierStatus   @default(LEAD)
+
+  notes           String?
+
+  lastContact     DateTime?
+
+  nextFollowUp    DateTime?
+
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+}
