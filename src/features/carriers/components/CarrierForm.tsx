@@ -8,6 +8,7 @@ import FormTextarea from "@/components/forms/FormTextarea";
 import { Button } from "@/components/ui/button";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { createCarrier } from "../actions/create-carrier";
 
 import {
     carrierSchema,
@@ -26,8 +27,15 @@ export default function CarrierForm() {
     });
 
     const onSubmit = async (data: CarrierSchema) => {
-        console.log(data);
-    };
+        const result = await createCarrier(data);
+
+        if (!result.success) {
+            console.error(result.errors);
+            return;
+        }
+
+        console.log("Carrier Created!", result);
+    }
 
     return (
 
