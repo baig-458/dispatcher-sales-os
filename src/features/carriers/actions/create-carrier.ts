@@ -1,11 +1,12 @@
 "use server";
-
+import { revalidatePath } from "next/cache";
 import {
     carrierSchema,
     type CarrierSchema,
 } from "../schemas/carrier.schema";
 
 import { carrierService } from "../services/carrier.service";
+import { carrierActivityService } from "../services/carrier-activity.service";
 
 export async function createCarrier(
     data: CarrierSchema
@@ -19,9 +20,29 @@ export async function createCarrier(
         };
     }
 
-    await carrierService.create(parsed.data);
+    try {
+        const carrier = await carrierService.create(
+            parsed.data
+        );
 
-    return {
-        success: true,
-    };
+        await carrierActivityService.create({
+            carrierId: carrier.id,
+            title: "Carrier Created",
+            note: "Carrier was added to DSOS.",
+        });
+
+        revalidatePath("/carriers");
+
+        return {
+            success: true,
+        };
+    } catch (error) {
+        console.error(error);
+
+        return {
+            success: false,
+            message: "A carrier with this MC Number already exists.",
+        };
+    }
+
 }

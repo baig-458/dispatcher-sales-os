@@ -9,6 +9,9 @@ import { Button } from "@/components/ui/button";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { createCarrier } from "../actions/create-carrier";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
+import { updateCarrier } from "../actions/update-carrier";
 
 import {
     carrierSchema,
@@ -16,26 +19,59 @@ import {
 } from "../schemas/carrier.schema";
 
 
-export default function CarrierForm() {
+type Props = {
+    defaultValues?: Partial<CarrierSchema>;
+    carrierId?: string;
+};
+
+export default function CarrierForm({
+    defaultValues,
+    carrierId,
+}: Props) {
 
     const {
         register,
         handleSubmit,
         control,
+        reset,
     } = useForm<CarrierSchema>({
         resolver: zodResolver(carrierSchema),
+        defaultValues,
     });
 
+    const router = useRouter();
+
+    // TODO:
+    // Add "Save & Add Another" workflow in Sprint 8.
+    // Current behavior redirects to the carrier list after a successful save.
+
     const onSubmit = async (data: CarrierSchema) => {
-        const result = await createCarrier(data);
+
+        const result = carrierId
+            ? await updateCarrier(carrierId, data)
+            : await createCarrier(data);
 
         if (!result.success) {
-            console.error(result.errors);
+            toast.error(result.message ?? "Something went wrong.");
             return;
         }
 
-        console.log("Carrier Created!", result);
-    }
+        toast.success(
+            carrierId
+                ? "Carrier updated successfully!"
+                : "Carrier created successfully!"
+        );
+
+        reset();
+
+        if (carrierId) {
+            router.replace(`/carriers/${carrierId}`);
+        } else {
+            router.replace("/carriers/new");
+        }
+
+        router.refresh();
+    };
 
     return (
 

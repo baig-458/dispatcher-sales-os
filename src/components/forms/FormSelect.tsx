@@ -41,7 +41,7 @@ export default function FormSelect<T extends FieldValues>({
                 name={id}
                 render={({ field }) => (
                     <Select
-                        value={field.value}
+                        value={field.value ?? ""}
                         onValueChange={field.onChange}
                     >
                         <SelectTrigger>
